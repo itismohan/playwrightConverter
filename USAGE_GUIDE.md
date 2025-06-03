@@ -48,31 +48,65 @@
 
 ## Using the Converter
 
-### Step 1: Upload a Java Selenium File
+### Single File Conversion
 
-1. Drag and drop your Java Selenium test file onto the upload area, or click to browse your files
-2. Only `.java` files are accepted (maximum size: 5MB)
-3. The file will be automatically processed upon upload
+1. **Upload a Java File:**
+   - Drag and drop your Java Selenium test file onto the upload area, or click to browse your files
+   - Only `.java` files are accepted (maximum size: 5MB)
+   - The file will be automatically processed upon upload
 
-### Step 2: Review the Conversion
+2. **Review the Conversion:**
+   - The original Java code will be displayed on the left side
+   - The converted Playwright TypeScript code will be displayed on the right side
+   - Conversion notes will appear below the code panels, highlighting any parts that need manual review
 
-1. The original Java code will be displayed on the left side
-2. The converted Playwright TypeScript code will be displayed on the right side
-3. Conversion notes will appear below the code panels, highlighting any parts that need manual review
+3. **Download the Results:**
+   - Click the download button in the Java panel to save the original code
+   - Click the download button in the TypeScript panel to save the converted code
 
-### Step 3: Download the Results
+### Batch Suite Conversion (New Feature)
 
-1. Click the download button in the Java panel to save the original code
-2. Click the download button in the TypeScript panel to save the converted code
+1. **Upload Your Test Suite:**
+   - **Option 1:** Click "Select Folder" to upload an entire directory structure
+   - **Option 2:** Click "Upload ZIP" to upload a ZIP archive containing your test suite
+   - The application will analyze the project structure and identify test classes, page objects, and utilities
 
-## Sample Files
+2. **Review Project Analysis:**
+   - After upload, the application will display statistics about your project
+   - You'll see counts of test classes, page objects, utility classes, and resource files
+   - The file tree on the left shows the complete project structure
 
-The application includes two sample Java Selenium test files for testing:
+3. **Convert the Entire Project:**
+   - Click "Convert Entire Project" to start the batch conversion process
+   - The application will process all files while maintaining dependencies and relationships
+   - A progress indicator will show conversion status
 
-1. `LoginTest.java` - A basic login test with assertions
-2. `ShoppingCartTest.java` - A more complex test with various Selenium features
+4. **Download the Converted Project:**
+   - Once conversion is complete, click "Download Converted Project"
+   - This will generate a ZIP file containing the complete Playwright project
+   - The ZIP includes all converted test files, page objects, utilities, and configuration files
 
-These files are located in the `src/test-samples/` directory.
+5. **Using the Converted Project:**
+   - Extract the downloaded ZIP file
+   - Run `npm install` to install dependencies
+   - Run `npx playwright install` to install browsers
+   - Run `npm test` to execute the tests
+
+## Project Structure of Converted Output
+
+The converted Playwright project will have the following structure:
+
+```
+playwright-project/
+├── playwright.config.ts    # Playwright configuration
+├── package.json            # Project dependencies and scripts
+├── tsconfig.json           # TypeScript configuration
+├── README.md               # Usage instructions
+└── src/                    # Source code directory
+    ├── tests/              # Converted test files
+    ├── pages/              # Converted page objects
+    └── utils/              # Converted utility functions
+```
 
 ## Conversion Coverage
 
@@ -85,6 +119,16 @@ The converter handles the following Selenium constructs:
 - **Waits:** Explicit waits with `ExpectedConditions`
 - **JavaScript Execution:** `executeScript()`
 - **Test Structure:** JUnit `@Test`, `@Before`, `@After`
+- **Page Objects:** Selenium Page Object pattern to Playwright Page Object pattern
+- **Utility Classes:** Static utility methods to TypeScript functions
+
+## Special Features for Batch Conversion
+
+- **Project Structure Preservation:** Maintains the same directory structure as the original project
+- **Dependency Mapping:** Correctly handles dependencies between classes
+- **Configuration Generation:** Creates all necessary configuration files for a working Playwright project
+- **Resource Handling:** Copies resource files to the appropriate locations
+- **Gradle Support:** Analyzes Gradle build files to understand project structure
 
 ## Limitations
 
@@ -98,5 +142,7 @@ Some complex Selenium patterns may require manual adjustments:
 ## Troubleshooting
 
 - **File Upload Issues:** Ensure your file has a `.java` extension and is under 5MB
+- **Folder Upload Issues:** Some browsers may have limitations with folder upload; try using Chrome
+- **ZIP Upload Issues:** Ensure your ZIP file is under 50MB and contains Java files
 - **Conversion Errors:** Check the error message for details on what went wrong
 - **Display Issues:** Try refreshing the page or using a different browser
