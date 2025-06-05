@@ -1,134 +1,183 @@
 import React from 'react';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import java from 'react-syntax-highlighter/dist/esm/languages/hljs/java';
-import typescript from 'react-syntax-highlighter/dist/esm/languages/hljs/typescript';
-import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import { ConversionResult } from '../utils/PlaywrightConverter';
-
-// Register languages
-SyntaxHighlighter.registerLanguage('java', java);
-SyntaxHighlighter.registerLanguage('typescript', typescript);
+import { Box, Typography, Paper, Grid, useTheme } from '@mui/material';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco, atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { Download, ContentCopy } from '@mui/icons-material';
+import { IconButton, Button, Tooltip } from '@mui/material';
 
 interface CodeComparisonProps {
   originalCode: string;
-  conversionResult: ConversionResult | null;
-  fileName: string;
+  convertedCode: string;
+  originalFileName: string;
+  convertedFileName: string;
 }
 
-const CodeComparison: React.FC<CodeComparisonProps> = ({ 
-  originalCode, 
-  conversionResult, 
-  fileName 
+const CodeComparison: React.FC<CodeComparisonProps> = ({
+  originalCode,
+  convertedCode,
+  originalFileName,
+  convertedFileName,
 }) => {
-  const outputFileName = fileName.replace('.java', '.ts');
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   
-  const downloadOriginalCode = () => {
-    const blob = new Blob([originalCode], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleCopyOriginal = () => {
+    navigator.clipboard.writeText(originalCode);
   };
-
-  const downloadConvertedCode = () => {
-    if (!conversionResult) return;
-    
-    const blob = new Blob([conversionResult.code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = outputFileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  
+  const handleCopyConverted = () => {
+    navigator.clipboard.writeText(convertedCode);
   };
-
+  
+  const handleDownloadOriginal = () => {
+    const element = document.createElement('a');
+    const file = new Blob([originalCode], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = originalFileName;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+  
+  const handleDownloadConverted = () => {
+    const element = document.createElement('a');
+    const file = new Blob([convertedCode], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = convertedFileName;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+  
   return (
-    <div className="code-comparison-container">
-      <div className="code-panels">
-        <div className="code-panel">
-          <div className="code-panel-header">
-            <h3>Original Java Selenium Code</h3>
-            <span className="file-name">{fileName}</span>
-            <button 
-              className="download-button" 
-              onClick={downloadOriginalCode}
-              title="Download original code"
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={6}>
+        <Paper 
+          elevation={2} 
+          sx={{ 
+            height: '100%', 
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ 
+            p: 1.5, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.default'
+          }}>
+            <Typography variant="subtitle1" fontWeight="medium">
+              {originalFileName} (Selenium - Java)
+            </Typography>
+            <Box>
+              <Tooltip title="Copy code">
+                <IconButton size="small" onClick={handleCopyOriginal} sx={{ mr: 1 }}>
+                  <ContentCopy fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Download file">
+                <IconButton size="small" onClick={handleDownloadOriginal}>
+                  <Download fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+          <Box sx={{ maxHeight: '600px', overflow: 'auto' }}>
+            <SyntaxHighlighter
+              language="java"
+              style={isDarkMode ? atomOneDark : docco}
+              customStyle={{ 
+                margin: 0,
+                padding: '16px',
+                fontSize: '14px',
+                lineHeight: '1.5',
+                borderRadius: 0
+              }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </button>
-          </div>
-          <div className="code-content">
-            <SyntaxHighlighter 
-              language="java" 
-              style={vs2015}
-              showLineNumbers={true}
-              wrapLines={true}
-            >
-              {originalCode}
+              {originalCode || '// No code to display'}
             </SyntaxHighlighter>
-          </div>
-        </div>
-        
-        <div className="code-panel">
-          <div className="code-panel-header">
-            <h3>Converted Playwright TypeScript</h3>
-            <span className="file-name">{outputFileName}</span>
-            {conversionResult && (
-              <button 
-                className="download-button" 
-                onClick={downloadConvertedCode}
-                title="Download converted code"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-              </button>
-            )}
-          </div>
-          <div className="code-content">
-            {conversionResult ? (
-              <SyntaxHighlighter 
-                language="typescript" 
-                style={vs2015}
-                showLineNumbers={true}
-                wrapLines={true}
-              >
-                {conversionResult.code}
-              </SyntaxHighlighter>
-            ) : (
-              <div className="no-code-message">
-                Upload a Java Selenium file to see the converted Playwright code
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Paper>
+      </Grid>
       
-      {conversionResult && conversionResult.comments.length > 0 && (
-        <div className="conversion-comments">
-          <h3>Conversion Notes</h3>
-          <ul>
-            {conversionResult.comments.map((comment, index) => (
-              <li key={index} className={`comment-${comment.type}`}>
-                {comment.line > 0 ? `Line ${comment.line}: ` : ''}{comment.text}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+      <Grid item xs={12} md={6}>
+        <Paper 
+          elevation={2} 
+          sx={{ 
+            height: '100%', 
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: '1px solid',
+            borderColor: theme.palette.primary.main + '40',
+          }}
+        >
+          <Box sx={{ 
+            p: 1.5, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            borderBottom: '1px solid',
+            borderColor: theme.palette.primary.main + '40',
+            bgcolor: theme.palette.primary.main + '08'
+          }}>
+            <Typography variant="subtitle1" fontWeight="medium" color="primary">
+              {convertedFileName} (Playwright - TypeScript)
+            </Typography>
+            <Box>
+              <Tooltip title="Copy code">
+                <IconButton size="small" onClick={handleCopyConverted} sx={{ mr: 1 }}>
+                  <ContentCopy fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Download file">
+                <IconButton size="small" onClick={handleDownloadConverted}>
+                  <Download fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+          <Box sx={{ maxHeight: '600px', overflow: 'auto' }}>
+            <SyntaxHighlighter
+              language="typescript"
+              style={isDarkMode ? atomOneDark : docco}
+              customStyle={{ 
+                margin: 0,
+                padding: '16px',
+                fontSize: '14px',
+                lineHeight: '1.5',
+                borderRadius: 0
+              }}
+            >
+              {convertedCode || '// Conversion in progress...'}
+            </SyntaxHighlighter>
+          </Box>
+          
+          {convertedCode && (
+            <Box sx={{ 
+              p: 2, 
+              borderTop: '1px solid', 
+              borderColor: 'divider',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}>
+              <Button 
+                variant="contained" 
+                color="primary"
+                startIcon={<Download />}
+                onClick={handleDownloadConverted}
+              >
+                Download Converted Code
+              </Button>
+            </Box>
+          )}
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };
 
